@@ -1,8 +1,5 @@
 from django.contrib import admin
-from .models import Recipe
-from .models import Ingredient
-from .models import IngredientToRecipe
-from .models import Favorite
+from .models import Recipe, Ingredient, IngredientToRecipe, Favorite, Search, ShoppingList
 
 
 class IngredientToRecipeInLine(admin.TabularInline):
@@ -13,6 +10,10 @@ class IngredientToRecipeInLine(admin.TabularInline):
 class FavoriteInLine(admin.TabularInline):
     model = Favorite
     extra = 1
+
+
+class SearchAdmin(admin.ModelAdmin):
+    pass
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -27,5 +28,7 @@ admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient,)
 admin.site.register(IngredientToRecipe)
 admin.site.register(Favorite, FavoriteAdmin)
+admin.site.register(Search, SearchAdmin)
+admin.site.register(ShoppingList)
 
 

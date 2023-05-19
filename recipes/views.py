@@ -1,10 +1,8 @@
-from django.shortcuts import render
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from recipes.serializers import RecipeSerializer
-from .models import Recipe
-from .models import Favorite
+from .models import Recipe, ShoppingList
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -12,11 +10,43 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [permissions.AllowAny]
 
+
 @api_view()
 def favorites(request):
-    favs = request.user.favorite_set.all()
+    favs = request.user.favorite_set.all()  # Alles gut, kann so bleiben
     favs_list = []
     for fav in favs:
         favs_list.append(fav.recipe_id_id)
 
     return Response(favs_list)
+
+
+@api_view()
+def search(request):
+    title = request.query_params.get('title')
+    results = Recipe.objects.filter(title__icontains=title)  # icontains = Case insensitive + contains
+    serialised_results = []
+    for result in results:
+        serializer = RecipeSerializer(result)
+        new_result = serializer.data  # Umbenennung zur besseren Lesbarkeit
+        serialised_results.append(new_result)
+
+    return Response(serialised_results)
+
+
+@api_view()
+def shoppinglists(request):
+    lists = request.user.shoppinglist_set.all()  #  Passt so
+    shoppinglists = []
+    for list in lists:
+        shoppinglists.append(list.title)
+
+    return Response(shoppinglists)
+
+
+@api_view()
+def shoppinglist_detail(request, shoppinglist_id):
+    shoppinglist = ShoppingList.objects.get(id=shoppinglist_id)
+    title = shoppinglist.title
+
+    return Response(title)
