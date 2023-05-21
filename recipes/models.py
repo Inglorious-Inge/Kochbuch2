@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-
 LEVELS = (
     ('easy', 'leicht'),
     ('medium', 'mittel'),
@@ -27,7 +26,6 @@ class Recipe(models.Model):
 
 class Search(models.Model):
     title = models.CharField(max_length=200, blank=True)
-    preparation_time_in_minutes_min = models.PositiveIntegerField(blank=True, null=True)
     preparation_time_in_minutes_max = models.PositiveIntegerField(blank=True, null=True)
     level = models.CharField(max_length=6, choices=LEVELS, blank=True)
     tags = models.CharField(max_length=200, blank=True)

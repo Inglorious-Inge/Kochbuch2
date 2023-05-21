@@ -24,7 +24,18 @@ def favorites(request):
 @api_view()
 def search(request):
     title = request.query_params.get('title')
-    results = Recipe.objects.filter(title__icontains=title)  # icontains = Case insensitive + contains
+    preparation_time_max = request.query_params.get('preparation_time_max')
+
+    if preparation_time_max is not None:
+        preparation_time_max = int(preparation_time_max)
+        results = Recipe.objects.filter(preparation_time_in_minutes__lte=preparation_time_max)
+        # lte = less than or equal
+        # linke Seite = Modelfeld / rechte Seite = Suchwert
+    elif title is not None:
+        results = Recipe.objects.filter(title__icontains=title)  # icontains = Case insensitive + contains
+    else:
+        results = Recipe.objects.all()
+
     serialised_results = []
     for result in results:
         serializer = RecipeSerializer(result)
