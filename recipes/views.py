@@ -47,6 +47,8 @@ def search(request):
         if tag_relation == 'or':  # 'or' = at least one of the tags
             search_results = search_results.filter(tags__tag__in=tag_list)
 
+    search_results = search_results.distinct()
+
     serialised_results = []
     for result in search_results:
         serializer = RecipeSerializer(result)
