@@ -17,11 +17,11 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField('Ingredient', through='IngredientToRecipe')
     level = models.CharField(max_length=6, choices=LEVELS)
     serving_size = models.PositiveIntegerField()
-    favored_by = models.ManyToManyField(get_user_model(),through='Favorite')
-
+    favored_by = models.ManyToManyField(get_user_model(), through='Favorite')
+    tags = models.ManyToManyField('Tag', through='TagToRecipe', blank=True)
 
     def __str__(self):
-        return f" {self.title} - {self.date_posted} - {self.preparation_time_in_minutes} - {self.ingredients} - {self.instructions} - "
+        return f" {self.title} - {self.date_posted} - {self.preparation_time_in_minutes} - {self.level} - {self.tags} - "
 
 
 class Search(models.Model):
@@ -38,10 +38,22 @@ class Ingredient(models.Model):
         return self.ingredient
 
 
+class Tag(models.Model):
+    tag = models.CharField(max_length=200, unique=True)
+
+    def __str__(self):
+        return self.tag
+
+
 class ShoppingList(models.Model):
     title = models.CharField(max_length=200)
     recipes = models.ManyToManyField(Recipe, through='RecipeToShoppinglist')
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+
+class TagToRecipe(models.Model):
+    recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
 
 class RecipeToShoppinglist(models.Model):

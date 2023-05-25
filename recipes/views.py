@@ -13,7 +13,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 @api_view()
 def favorites(request):
-    favs = request.user.favorite_set.all()  # Alles gut, kann so bleiben
+    favs = request.user.favorite_set.all()  # okay
     favs_list = []
     for fav in favs:
         favs_list.append(fav.recipe_id_id)
@@ -25,21 +25,32 @@ def favorites(request):
 def search(request):
     title = request.query_params.get('title')
     preparation_time_max = request.query_params.get('preparation_time_max')
+    level = request.query_params.get('levels')
+    tags = request.query_params.get('tags')
+    tag_relation = request.query_params.get('tag_relation', 'and')  # 'and' as default if not provided
+    search_results = Recipe.objects.all()  # QuerySet
 
+    if title is not None:
+        search_results = search_results.filter(title__icontains=title)  # icontains = Case insensitive + contains
     if preparation_time_max is not None:
         preparation_time_max = int(preparation_time_max)
-        results = Recipe.objects.filter(preparation_time_in_minutes__lte=preparation_time_max)
+        search_results = search_results.filter(preparation_time_in_minutes__lte=preparation_time_max)
         # lte = less than or equal
         # linke Seite = Modelfeld / rechte Seite = Suchwert
-    elif title is not None:
-        results = Recipe.objects.filter(title__icontains=title)  # icontains = Case insensitive + contains
-    else:
-        results = Recipe.objects.all()
+    if level is not None:
+        search_results = search_results.filter(level__iexact=level)  # besser möglich?
+    if tags is not None:
+        tag_list = [tag.strip() for tag in tags.split(',')]
+        if tag_relation == 'and':  # 'and' = all the tags
+            for tag in tag_list:
+                search_results = search_results.filter(tags__tag=tag)
+        if tag_relation == 'or':  # 'or' = at least one of the tags
+            search_results = search_results.filter(tags__tag__in=tag_list)
 
     serialised_results = []
-    for result in results:
+    for result in search_results:
         serializer = RecipeSerializer(result)
-        new_result = serializer.data  # Umbenennung zur besseren Lesbarkeit
+        new_result = serializer.data  # renaming for readability
         serialised_results.append(new_result)
 
     return Response(serialised_results)
@@ -47,7 +58,7 @@ def search(request):
 
 @api_view()
 def shoppinglists(request):
-    lists = request.user.shoppinglist_set.all()  #  Passt so
+    lists = request.user.shoppinglist_set.all()  #  okay
     shoppinglists = []
     for list in lists:
         shoppinglists.append(list.title)
