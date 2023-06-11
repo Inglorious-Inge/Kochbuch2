@@ -90,7 +90,7 @@ class TagToRecipe(models.Model):
     tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f" {self.tag_id} added to {self.recipe_id.title}"
+        return f" {self.tag_id} to {self.recipe_id.title}"
 
 
 class RecipeToShoppinglist(models.Model):
@@ -98,7 +98,7 @@ class RecipeToShoppinglist(models.Model):
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f" {self.recipe_id.title} added to {self.shoppinglist_id}"
+        return f" {self.recipe_id.title} to {self.shoppinglist_id}"
 
 
 class IngredientToRecipe(models.Model):
