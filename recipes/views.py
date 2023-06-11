@@ -10,6 +10,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [permissions.AllowAny]
 
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
 
 @api_view()
 def favorites(request):
@@ -74,3 +77,23 @@ def shoppinglist_detail(request, shoppinglist_id):
     title = shoppinglist.title
 
     return Response(title)
+
+
+
+   # def find_similar_recipes(self):
+   #
+   #      same_tag = Recipe.objects.filter(tags__in=self.tags.all())
+   #
+   #      at_least_two_shared_ingredients = Recipe.objects.filter(ingredients__in=self.ingredients.all()).annotate(
+   #          shared_ingredients=Count('ingredients'),
+   #      ).filter(shared_ingredients__gte=2)
+   #
+   #      four_or_more_shared_ingredients = Recipe.objects.filter(ingredients__in=self.ingredients.all()).annotate(
+   #          shared_ingredients=Count('ingredients')
+   #      ).filter(shared_ingredients__gte=4)
+   #
+   #      similar_recipes = ((same_tag & at_least_two_shared_ingredients) | four_or_more_shared_ingredients)
+   #
+   #      similar_recipes = similar_recipes.exclude(id=self.id)
+   #
+   #      return similar_recipes.distinct()
