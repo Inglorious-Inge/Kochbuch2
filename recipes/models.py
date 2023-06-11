@@ -63,8 +63,14 @@ class Ingredient(models.Model):
         return self.ingredient
 
 
+class TagManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).order_by(Lower('tag'))
+
+
 class Tag(models.Model):
     tag = models.CharField(max_length=200, unique=True)
+    objects = TagManager()
 
     def __str__(self):
         return self.tag
