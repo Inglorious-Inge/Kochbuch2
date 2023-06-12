@@ -8,6 +8,11 @@ class IngredientToRecipeInLine(admin.TabularInline):
     extra = 1
 
 
+class RecipeToShoppinglistInLine(admin.TabularInline):
+    model = RecipeToShoppinglist
+    extra = 1
+
+
 class FavoriteInLine(admin.TabularInline):
     model = Favorite
     extra = 1
@@ -26,6 +31,10 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [IngredientToRecipeInLine, FavoriteInLine, TagToRecipeInLine]
 
 
+class ShoppinglistAdmin(admin.ModelAdmin):
+    inlines = [RecipeToShoppinglistInLine]
+
+
 class FavoriteAdmin(admin.ModelAdmin):
     pass
 
@@ -35,7 +44,7 @@ admin.site.register(Ingredient, )
 admin.site.register(IngredientToRecipe)
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(Search, SearchAdmin)
-admin.site.register(ShoppingList)
+admin.site.register(ShoppingList, ShoppinglistAdmin)
 admin.site.register(RecipeToShoppinglist)
 admin.site.register(Tag)
 admin.site.register(TagToRecipe)
