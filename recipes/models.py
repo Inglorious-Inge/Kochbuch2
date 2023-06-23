@@ -23,18 +23,6 @@ class Recipe(models.Model):
     favored_by = models.ManyToManyField(get_user_model(), through='Favorite', related_name="recipes_favored")
     tags = models.ManyToManyField('Tag', through='TagToRecipe', blank=True)
 
-    # def find_similar(self, other_recipe):
-    #     score = 0
-    #     common_tags = self.tags.all().intersection(other_recipe.tags.all())
-    #     score += common_tags.count()
-    #     common_ingredients = self.ingredients.all().intersection(other_recipe.ingredients.all())
-    #     score += common_ingredients.count()
-    #     if self.level == other_recipe.level:
-    #         score += 1
-    #     if abs(self.preparation_time_in_minutes - other_recipe.preparation_time_in_minutes) <= 15:
-    #         score += 1
-    #     return score
-
     def __str__(self):
         return f" {self.title} - {self.preparation_time_in_minutes} - {self.level} - {self.tags} - "
 
