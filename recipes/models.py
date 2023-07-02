@@ -72,20 +72,27 @@ class ShoppingList(models.Model):
         return f" {self.title} "
 
 
+class ShoppingListIngredient(models.Model):
+    shopping_list = models.ForeignKey(ShoppingList, on_delete=models.CASCADE, related_name='ingredients')
+    ingredient = models.CharField(max_length=200)
+    unit = models.CharField(max_length=200)
+    amount = models.PositiveIntegerField()
+    is_bought = models.BooleanField(default=False)
+    objects = IngredientManager()
+
+    class Meta:
+        unique_together = [
+            ('ingredient', 'unit', 'shopping_list')
+        ]
+    def __str__(self):
+        return f'{self.shopping_list}: {self.ingredient} ({self.unit})'
+
 class TagToRecipe(models.Model):
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
     def __str__(self):
         return f" {self.tag_id} to {self.recipe_id.title}"
-
-
-class IngredientToShoppinglist(models.Model):
-    shoppinglist_id = models.ForeignKey(ShoppingList, on_delete=models.CASCADE)
-    recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f" {self.recipe_id.title} to {self.shoppinglist_id}"
 
 
 class IngredientToRecipe(models.Model):

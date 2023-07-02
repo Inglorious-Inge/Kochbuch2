@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from recipes.serializers import RecipeSerializer
+from recipes.serializers import RecipeSerializer, ShoppingListSerializer
 from .models import Recipe, ShoppingList
 
 
@@ -64,11 +64,8 @@ def search(request):
 @api_view()
 def shoppinglists(request):
     lists = request.user.shoppinglist_set.all()  #  okay
-    shoppinglists = []
-    for list in lists:
-        shoppinglists.append(list.title)
-
-    return Response(shoppinglists)
+    serializer = ShoppingListSerializer(lists, many=True)
+    return Response(serializer.data)
 
 
 @api_view()
