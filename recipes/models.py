@@ -66,7 +66,6 @@ class Tag(models.Model):
 
 class ShoppingList(models.Model):
     title = models.CharField(max_length=200)
-    recipes = models.ManyToManyField(Recipe, through='RecipeToShoppinglist')
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
 
     def __str__(self):
@@ -81,7 +80,7 @@ class TagToRecipe(models.Model):
         return f" {self.tag_id} to {self.recipe_id.title}"
 
 
-class RecipeToShoppinglist(models.Model):
+class IngredientToShoppinglist(models.Model):
     shoppinglist_id = models.ForeignKey(ShoppingList, on_delete=models.CASCADE)
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
