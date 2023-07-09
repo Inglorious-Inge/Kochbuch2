@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q  # A Q object describes a part of an SQL query
 from django.contrib.auth import get_user_model
 from django.db.models.functions import Lower
 from django.db.models import Count
@@ -25,6 +26,19 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f" {self.title} - {self.preparation_time_in_minutes} - {self.level} - {self.tags} - "
+
+    def find_similar_recipes(self):
+        same_tag = Q(tags__in=self.tags.all())
+        has_shared_ingredients = Q(ingredients__in=self.ingredients.all())
+        at_least_two_shared_ingredients = Recipe.objects.filter(same_tag & has_shared_ingredients).annotate(
+            shared_ingredients=Count("ingredients")
+        ).filter(shared_ingredients__gte=2)
+        four_or_more_shared_ingredients = Recipe.objects.filter(has_shared_ingredients).annotate(
+            shared_ingredients=Count("ingredients")
+        ).filter(shared_ingredients__gte=4)
+        similar_recipes = at_least_two_shared_ingredients | four_or_more_shared_ingredients
+        similar_recipes = similar_recipes.exclude(id=self.id)
+        return similar_recipes.distinct()
 
 
 class Search(models.Model):
