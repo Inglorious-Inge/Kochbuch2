@@ -71,9 +71,8 @@ def shoppinglists(request):
 @api_view()
 def shoppinglist_detail(request, shoppinglist_id):
     shoppinglist = ShoppingList.objects.get(id=shoppinglist_id)
-    title = shoppinglist.title
-
-    return Response(title)
+    serializer = ShoppingListSerializer(shoppinglist)
+    return Response(serializer.data)
 
 
 
