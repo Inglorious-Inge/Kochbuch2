@@ -30,15 +30,19 @@ class Recipe(models.Model):
     def find_similar_recipes(self):
         same_tag = Q(tags__in=self.tags.all())
         has_shared_ingredients = Q(ingredients__in=self.ingredients.all())
-        at_least_two_shared_ingredients = Recipe.objects.filter(same_tag & has_shared_ingredients).annotate(
+        same_tag_and_at_least_two_shared_ingredients = Recipe.objects.filter(same_tag & has_shared_ingredients).annotate(
             shared_ingredients=Count("ingredients")
         ).filter(shared_ingredients__gte=2)
-        four_or_more_shared_ingredients = Recipe.objects.filter(has_shared_ingredients).annotate(
+        at_least_four_shared_ingredients = Recipe.objects.filter(has_shared_ingredients).annotate(
             shared_ingredients=Count("ingredients")
         ).filter(shared_ingredients__gte=4)
-        similar_recipes = at_least_two_shared_ingredients | four_or_more_shared_ingredients
+        similar_recipes = at_least_four_shared_ingredients | same_tag_and_at_least_two_shared_ingredients
+        # similar_recipes = at_least_four_shared_ingredients.exclude(id=self.id).union(
+        #    same_tag_and_at_least_two_shared_ingredients.exclude(id=self.id))
+        # breakpoint()
         similar_recipes = similar_recipes.exclude(id=self.id)
         return similar_recipes.distinct()
+        # return similar_recipes
 
 
 class Search(models.Model):
@@ -98,8 +102,10 @@ class ShoppingListIngredient(models.Model):
         unique_together = [
             ('ingredient', 'unit', 'shopping_list')
         ]
+
     def __str__(self):
         return f'{self.shopping_list}: {self.ingredient} ({self.unit})'
+
 
 class TagToRecipe(models.Model):
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)

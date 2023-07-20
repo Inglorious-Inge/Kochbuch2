@@ -1,6 +1,7 @@
 from django.test import TestCase
 from recipes.models import Ingredient, IngredientToRecipe, Recipe, Tag
 
+
 class TestRecipe(TestCase):
 
     def setUp(self):
