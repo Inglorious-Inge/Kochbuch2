@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q  # A Q object describes a part of an SQL query
 from django.contrib.auth import get_user_model
 from django.db.models.functions import Lower
 from django.db.models import Count
@@ -23,20 +24,19 @@ class Recipe(models.Model):
     favored_by = models.ManyToManyField(get_user_model(), through='Favorite', related_name="recipes_favored")
     tags = models.ManyToManyField('Tag', through='TagToRecipe', blank=True)
 
-    # def find_similar(self, other_recipe):
-    #     score = 0
-    #     common_tags = self.tags.all().intersection(other_recipe.tags.all())
-    #     score += common_tags.count()
-    #     common_ingredients = self.ingredients.all().intersection(other_recipe.ingredients.all())
-    #     score += common_ingredients.count()
-    #     if self.level == other_recipe.level:
-    #         score += 1
-    #     if abs(self.preparation_time_in_minutes - other_recipe.preparation_time_in_minutes) <= 15:
-    #         score += 1
-    #     return score
-
     def __str__(self):
         return f" {self.title} - {self.preparation_time_in_minutes} - {self.level} - {self.tags} - "
+
+    def find_similar_recipes(self):
+        same_tag = Q(tags__in=self.tags.all())
+        has_shared_ingredients = Q(ingredients__in=self.ingredients.all())
+
+        return Recipe.objects.annotate(
+            shared_ingredients=Count("ingredients")
+        ).filter(has_shared_ingredients).filter(
+            Q(same_tag, shared_ingredients__gte=2)
+            | Q(shared_ingredients__gte=4)
+        ).exclude(id=self.id)
 
 
 class Search(models.Model):
@@ -78,11 +78,27 @@ class Tag(models.Model):
 
 class ShoppingList(models.Model):
     title = models.CharField(max_length=200)
-    recipes = models.ManyToManyField(Recipe, through='RecipeToShoppinglist')
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
 
     def __str__(self):
         return f" {self.title} "
+
+
+class ShoppingListIngredient(models.Model):
+    shopping_list = models.ForeignKey(ShoppingList, on_delete=models.CASCADE, related_name='ingredients')
+    ingredient = models.CharField(max_length=200)
+    unit = models.CharField(max_length=200)
+    amount = models.PositiveIntegerField()
+    is_bought = models.BooleanField(default=False)
+    objects = IngredientManager()
+
+    class Meta:
+        unique_together = [
+            ('ingredient', 'unit', 'shopping_list')
+        ]
+
+    def __str__(self):
+        return f'{self.shopping_list}: {self.ingredient} ({self.unit})'
 
 
 class TagToRecipe(models.Model):
@@ -91,14 +107,6 @@ class TagToRecipe(models.Model):
 
     def __str__(self):
         return f" {self.tag_id} to {self.recipe_id.title}"
-
-
-class RecipeToShoppinglist(models.Model):
-    shoppinglist_id = models.ForeignKey(ShoppingList, on_delete=models.CASCADE)
-    recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f" {self.recipe_id.title} to {self.shoppinglist_id}"
 
 
 class IngredientToRecipe(models.Model):

@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import (Recipe, Ingredient, IngredientToRecipe, Favorite, Search, ShoppingList, RecipeToShoppinglist, Tag,
-                     TagToRecipe)
+from .models import (Recipe, Ingredient, IngredientToRecipe, Favorite, Search, ShoppingList, ShoppingListIngredient,
+                     Tag, TagToRecipe)
 
 
 class IngredientToRecipeInLine(admin.TabularInline):
@@ -8,10 +8,9 @@ class IngredientToRecipeInLine(admin.TabularInline):
     extra = 1
 
 
-class RecipeToShoppinglistInLine(admin.TabularInline):
-    model = RecipeToShoppinglist
+class ShoppingListIngredientInLine(admin.TabularInline):
+    model = ShoppingListIngredient
     extra = 1
-
 
 class FavoriteInLine(admin.TabularInline):
     model = Favorite
@@ -32,8 +31,11 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class ShoppinglistAdmin(admin.ModelAdmin):
-    inlines = [RecipeToShoppinglistInLine]
+    inlines = [ShoppingListIngredientInLine]
 
+
+class ShoppingListIngredientAdmin(admin.ModelAdmin):
+    pass
 
 class FavoriteAdmin(admin.ModelAdmin):
     pass
@@ -45,6 +47,6 @@ admin.site.register(IngredientToRecipe)
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(Search, SearchAdmin)
 admin.site.register(ShoppingList, ShoppinglistAdmin)
-admin.site.register(RecipeToShoppinglist)
+admin.site.register(ShoppingListIngredient, ShoppingListIngredientAdmin)
 admin.site.register(Tag)
 admin.site.register(TagToRecipe)

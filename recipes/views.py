@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from recipes.serializers import RecipeSerializer
+from recipes.serializers import RecipeSerializer, ShoppingListSerializer
 from .models import Recipe, ShoppingList
 
 
@@ -64,36 +64,13 @@ def search(request):
 @api_view()
 def shoppinglists(request):
     lists = request.user.shoppinglist_set.all()  #  okay
-    shoppinglists = []
-    for list in lists:
-        shoppinglists.append(list.title)
-
-    return Response(shoppinglists)
+    serializer = ShoppingListSerializer(lists, many=True)
+    return Response(serializer.data)
 
 
 @api_view()
 def shoppinglist_detail(request, shoppinglist_id):
     shoppinglist = ShoppingList.objects.get(id=shoppinglist_id)
-    title = shoppinglist.title
+    serializer = ShoppingListSerializer(shoppinglist)
+    return Response(serializer.data)
 
-    return Response(title)
-
-
-
-   # def find_similar_recipes(self):
-   #
-   #      same_tag = Recipe.objects.filter(tags__in=self.tags.all())
-   #
-   #      at_least_two_shared_ingredients = Recipe.objects.filter(ingredients__in=self.ingredients.all()).annotate(
-   #          shared_ingredients=Count('ingredients'),
-   #      ).filter(shared_ingredients__gte=2)
-   #
-   #      four_or_more_shared_ingredients = Recipe.objects.filter(ingredients__in=self.ingredients.all()).annotate(
-   #          shared_ingredients=Count('ingredients')
-   #      ).filter(shared_ingredients__gte=4)
-   #
-   #      similar_recipes = ((same_tag & at_least_two_shared_ingredients) | four_or_more_shared_ingredients)
-   #
-   #      similar_recipes = similar_recipes.exclude(id=self.id)
-   #
-   #      return similar_recipes.distinct()
