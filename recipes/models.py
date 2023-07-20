@@ -30,19 +30,13 @@ class Recipe(models.Model):
     def find_similar_recipes(self):
         same_tag = Q(tags__in=self.tags.all())
         has_shared_ingredients = Q(ingredients__in=self.ingredients.all())
-        same_tag_and_at_least_two_shared_ingredients = Recipe.objects.filter(same_tag & has_shared_ingredients).annotate(
+
+        return Recipe.objects.annotate(
             shared_ingredients=Count("ingredients")
-        ).filter(shared_ingredients__gte=2)
-        at_least_four_shared_ingredients = Recipe.objects.filter(has_shared_ingredients).annotate(
-            shared_ingredients=Count("ingredients")
-        ).filter(shared_ingredients__gte=4)
-        similar_recipes = at_least_four_shared_ingredients | same_tag_and_at_least_two_shared_ingredients
-        # similar_recipes = at_least_four_shared_ingredients.exclude(id=self.id).union(
-        #    same_tag_and_at_least_two_shared_ingredients.exclude(id=self.id))
-        # breakpoint()
-        similar_recipes = similar_recipes.exclude(id=self.id)
-        return similar_recipes.distinct()
-        # return similar_recipes
+        ).filter(has_shared_ingredients).filter(
+            Q(same_tag, shared_ingredients__gte=2)
+            | Q(shared_ingredients__gte=4)
+        ).exclude(id=self.id)
 
 
 class Search(models.Model):
